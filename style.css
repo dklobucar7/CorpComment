@@ -178,7 +178,7 @@ button {
 }
 
 .form:focus-within {
-    outline: 2px solid rgba(255, 255, 255, 0.125);
+    outline: 2px solid rgba(236, 233, 240, 0.125);
 }
 
 .form--invalid {
