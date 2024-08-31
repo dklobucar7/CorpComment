@@ -1,5 +1,6 @@
 // -- GLOBAL --
 const MAX_CHARS = 150;
+const BASE_API_URL = "https://bytegrad.com/course-assets/js/1/api";
 
 const counterEl = document.querySelector(".counter");
 const textareaEl = document.querySelector(".form__textarea");
@@ -89,7 +90,7 @@ const submitHandler = (event) => {
   const upvoteCount = 0;
   const daysAgo = 0;
 
-  // create a feedback item object
+  // create feedback item object, render feedback item in list
   const feedbackItem = {
     hashtag: hashtag,
     company: company,
@@ -100,6 +101,25 @@ const submitHandler = (event) => {
   };
   // render feedback item
   renderFeedbackItem(feedbackItem);
+
+  // send feedback item to server
+  fetch(`${BASE_API_URL}/feedbacks`, {
+    method: "POST",
+    body: JSON.stringify(feedbackItem), //pretvarmo js file u JSON format
+    headers: {
+      Accept: "application/json", // what kind of data we can accept back - we accept json
+      "Content-Type": "application/json", // for json
+    },
+  }) // what we wont to do when we recieve response
+    .then((response) => {
+      if (!response.ok) {
+        console.log("Something went wrong.");
+        return;
+      }
+
+      console.log("Successfully submitted.");
+    })
+    .catch((error) => console.log(error));
 
   // insert new feedback item in list
 
@@ -117,7 +137,38 @@ formEl.addEventListener("submit", submitHandler);
 
 // -- FEEDBACK LIST COMPONENT
 
-fetch("https://bytegrad.com/course-assets/js/1/api/feedbacks")
+const clickHandler = (event) => {
+  // get clicked HTML-element
+  const clickedEl = event.target;
+
+  // determine if user intended to upvote or expand
+  const upvoteIntention = clickedEl.className.includes("upvote");
+
+  // run the appropriate logic
+  if (upvoteIntention) {
+    // get the closest upvote button
+    const upvoteBtnEl = clickedEl.closest(".upvote");
+
+    // disable upvote button (prevent double-click, spam)
+    upvoteBtnEl.disabled = true;
+
+    // select the upvote count element within the upvote button
+    const upvoteCountEl = upvoteBtnEl.querySelector(".upvote__count");
+
+    // get currently displayed upvote count as number (+), ovaj plus odmah konvertira u integer
+    let upvoteCount = +upvoteCountEl.textContent;
+
+    // set upvote count increment by 1
+    upvoteCountEl.textContent = ++upvoteCount;
+  } else {
+    // expand the clicked feedback item
+    clickedEl.closest(".feedback").classList.toggle("feedback--expand");
+  }
+};
+
+feedbackListEl.addEventListener("click", clickHandler);
+
+fetch(`${BASE_API_URL}/feedbacks`)
   .then((response) => {
     if (!response.ok) {
       console.log("Nije uspješno.");
