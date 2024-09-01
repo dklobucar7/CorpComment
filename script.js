@@ -8,6 +8,7 @@ const formEl = document.querySelector(".form");
 const feedbackListEl = document.querySelector(".feedbacks");
 const submitBtnEl = document.querySelector(".submit-btn");
 const spinnerEl = document.querySelector(".spinner");
+const hashtagListEL = document.querySelector(".hashtags");
 
 // new feedback item HTML
 const renderFeedbackItem = (feedbackItem) => {
@@ -185,3 +186,39 @@ fetch(`${BASE_API_URL}/feedbacks`)
   .catch((error) => {
     feedbackListEl.textContent = `Failed to fetch feedback items. Error message: ${error.message}`;
   });
+
+// -- HASHTAG LIST COMPONENT --
+
+const clickHandler2 = (event) => {
+  // get clicked HTML element
+  const clickedEl = event.target;
+
+  // stop function if click happend in list, but outside buttons
+  if (clickedEl.className === "hashtags") return;
+
+  // extract company name
+  const companyNameFromHashtag = clickedEl.textContent
+    .substring(1)
+    .toLowerCase()
+    .trim();
+
+  // iterate over each feedback item in the list - feedbackListEl je HTML element, a ne array
+  feedbackListEl.childNodes.forEach((childNode) => {
+    // stop this iteration if it's a text node, to je 3
+    if (childNode.nodeType === 3) return;
+
+    // extract company name
+    const companyNameFromFeedbackItem = childNode
+      .querySelector(".feedback__company")
+      .textContent.toLowerCase()
+      .trim();
+
+    // we want to show same companyNameFromHashtag and companyNameFromFeedbackItem
+    // remove feedback item from the list if company names are not equal
+    if (companyNameFromHashtag !== companyNameFromFeedbackItem) {
+      childNode.remove();
+    }
+  });
+};
+
+hashtagListEL.addEventListener("click", clickHandler2);
